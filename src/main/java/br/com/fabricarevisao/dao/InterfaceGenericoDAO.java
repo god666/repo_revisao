@@ -3,12 +3,13 @@ package br.com.fabricarevisao.dao;
 import java.sql.Connection;
 import java.util.List;
 
-public interface InterfaceGenericoDAO <T>{
+public interface InterfaceGenericoDAO <Objeto>{
 	
-	public void cadastrar(T entrada);
-	public void atualizar(T entrada);
-	public void salvar(T entrada);
-	public T buscarPorId(int id);
-	public List<T> buscarTudo();
+	public void cadastrar(Objeto entrada);
+	public void atualizar(Objeto entrada);
+	public void salvar(Objeto entrada);
+	public Objeto buscarPorId(int id);
+	public List<Objeto> buscarTudo();
+	public void excluir (int id);
 
 }

@@ -2,19 +2,20 @@ package br.com.fabricarevisao.dao;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 import br.com.fabricarevisao.entidade.Usuario;
 
-public class UsuarioDAO implements InterfaceUsuarioDAO{
+public class UsuarioDAO implements InterfaceGenericoDAO<Usuario>{
 
 	private Connection connection = ConnectionFactory.getConnection();
 	
 	@Override
 	public void cadastrar(Usuario usuario) {
 		String sql = "insert into Usuario (nome, login, senha) values (?,?,?)";
-		//Usuario usuario = entrada;
 		
 		try (PreparedStatement preparador = connection.prepareStatement(sql)){
 			preparador.setString(1, usuario.getNome());
@@ -32,28 +33,97 @@ public class UsuarioDAO implements InterfaceUsuarioDAO{
 	}
 
 	@Override
-	public void atualizar(Usuario entrada) {
-		// TODO Auto-generated method stub
+	public void atualizar(Usuario usuario) {
+		String sql = "update Usuario set nome=?, login=?, senha=? where id=?";
+		
+		try (PreparedStatement preparador = connection.prepareStatement(sql)){
+			preparador.setString(1, usuario.getNome());
+			preparador.setString(2, usuario.getLogin());
+			preparador.setString(3, usuario.getSenha());
+			preparador.setInt(4, usuario.getId());
+			
+			preparador.execute();
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 	}
 
 	@Override
-	public void salvar(Usuario entrada) {
-		// TODO Auto-generated method stub
-		
+	public void salvar(Usuario usuario) {
+		if(usuario.getId() !=0){
+			atualizar(usuario);
+		} else{
+			cadastrar(usuario);
+		}
 	}
 
 	@Override
 	public Usuario buscarPorId(int id) {
-		// TODO Auto-generated method stub
-		return null;
+		
+		String sql = "select * from Usuario where id="+id;
+		Usuario usuario = null;
+		
+		try (PreparedStatement preparador = connection.prepareStatement(sql)){
+			ResultSet resultado = preparador.executeQuery();
+			
+			if(resultado.next()){
+				usuario.setId(id);
+				usuario.setNome(resultado.getString("nome"));
+				usuario.setLogin(resultado.getString("login"));
+				usuario.setSenha(resultado.getString("senha"));
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		//Se não for encontrado nenhum usuário, retornará o valor de usuario = null
+		return usuario;
 	}
 
 	@Override
 	public List<Usuario> buscarTudo() {
-		// TODO Auto-generated method stub
-		return null;
+
+		String sql = "select * from Usuario";
+		List<Usuario> lista = new ArrayList<Usuario>();  //Null por default?
+		
+		try (PreparedStatement preparador = connection.prepareStatement(sql)){
+			ResultSet resultado = preparador.executeQuery();
+			
+			while(resultado.next()){
+				Usuario usuario = new Usuario();
+				usuario.setId(resultado.getInt("id"));
+				usuario.setNome(resultado.getString("nome"));
+				usuario.setLogin(resultado.getString("login"));
+				usuario.setSenha(resultado.getString("senha"));
+				
+				lista.add(usuario);
+			}
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return lista;
 	}
 
+	@Override
+	public void excluir(int id) {
+		
+		String sql = "delete from Usuario where id="+id;
+		
+		try (PreparedStatement preparador = connection.prepareStatement(sql)){
+			preparador.execute();
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
 
 }

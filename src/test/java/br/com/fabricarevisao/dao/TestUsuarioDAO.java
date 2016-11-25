@@ -8,7 +8,7 @@ public class TestUsuarioDAO {
 		Usuario u = new Usuario();
 		UsuarioDAO dao = new UsuarioDAO();
 		
-		u.setNome("Revisao Teste 2");
+		u.setNome("Revisao Teste 3");
 		u.setLogin("revisao");
 		u.setSenha("123");
 		dao.cadastrar(u);
