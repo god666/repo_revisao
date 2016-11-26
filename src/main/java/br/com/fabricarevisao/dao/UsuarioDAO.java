@@ -12,6 +12,8 @@ import br.com.fabricarevisao.entidade.Usuario;
 public class UsuarioDAO implements InterfaceGenericoDAO<Usuario>{
 
 	private Connection connection = ConnectionFactory.getConnection();
+	private String criptografia = "md5";
+	private String nomeTabela = "Usuario";
 	
 	@Override
 	public void cadastrar(Usuario usuario) {
@@ -20,6 +22,7 @@ public class UsuarioDAO implements InterfaceGenericoDAO<Usuario>{
 		try (PreparedStatement preparador = connection.prepareStatement(sql)){
 			preparador.setString(1, usuario.getNome());
 			preparador.setString(2, usuario.getLogin());
+			//preparador.setString(3, criptografia);
 			preparador.setString(3, usuario.getSenha());
 			
 			preparador.execute();
@@ -39,6 +42,7 @@ public class UsuarioDAO implements InterfaceGenericoDAO<Usuario>{
 		try (PreparedStatement preparador = connection.prepareStatement(sql)){
 			preparador.setString(1, usuario.getNome());
 			preparador.setString(2, usuario.getLogin());
+			//preparador.setString(3, criptografia);
 			preparador.setString(3, usuario.getSenha());
 			preparador.setInt(4, usuario.getId());
 			
@@ -64,7 +68,7 @@ public class UsuarioDAO implements InterfaceGenericoDAO<Usuario>{
 	public Usuario buscarPorId(int id) {
 		
 		String sql = "select * from Usuario where id="+id;
-		Usuario usuario = null;
+		Usuario usuario = new Usuario();
 		
 		try (PreparedStatement preparador = connection.prepareStatement(sql)){
 			ResultSet resultado = preparador.executeQuery();
@@ -74,6 +78,8 @@ public class UsuarioDAO implements InterfaceGenericoDAO<Usuario>{
 				usuario.setNome(resultado.getString("nome"));
 				usuario.setLogin(resultado.getString("login"));
 				usuario.setSenha(resultado.getString("senha"));
+				
+				return usuario;
 			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -81,7 +87,7 @@ public class UsuarioDAO implements InterfaceGenericoDAO<Usuario>{
 		}
 		
 		//Se não for encontrado nenhum usuário, retornará o valor de usuario = null
-		return usuario;
+		return null;
 	}
 
 	@Override
@@ -108,13 +114,19 @@ public class UsuarioDAO implements InterfaceGenericoDAO<Usuario>{
 			e.printStackTrace();
 		}
 		
-		return lista;
+		if(lista.isEmpty()){
+			return null;
+		} else {
+			return lista;
+		}
+		
+		
 	}
 
 	@Override
 	public void excluir(int id) {
 		
-		String sql = "delete from Usuario where id="+id;
+		String sql = "delete from "+nomeTabela+" where id="+id;
 		
 		try (PreparedStatement preparador = connection.prepareStatement(sql)){
 			preparador.execute();
@@ -126,4 +138,30 @@ public class UsuarioDAO implements InterfaceGenericoDAO<Usuario>{
 		
 	}
 
+	public Usuario buscarPorLoginSenha(String login, String senha){
+		String sql = "select * from Usuario where login=? and senha=?";
+		Usuario usuario = new Usuario();
+		
+		try (PreparedStatement preparador = connection.prepareStatement(sql)){
+			preparador.setString(1, login);
+			preparador.setString(2, senha);
+			
+			ResultSet resultado = preparador.executeQuery();
+			
+			if(resultado.next()){
+				usuario.setId(resultado.getInt("id"));
+				usuario.setNome(resultado.getString("nome"));
+				usuario.setLogin(resultado.getString("login"));
+				usuario.setSenha(resultado.getString("senha"));
+				return usuario;
+			}
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
+	
 }
